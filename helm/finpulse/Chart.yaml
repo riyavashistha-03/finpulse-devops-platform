@@ -2,9 +2,11 @@ apiVersion: v2
 name: finpulse
 description: Helm chart for FinPulse Cloud-Native Financial Platform
 type: application
-version: 1.0.0
-appVersion: "1.0.0"
+version: 1.1.0
+appVersion: "1.1.0"
 maintainers:
+  - name: Vivek Rana
+    email: vivekrana.031122@gmail.com
   - name: Riya Vashistha
     email: riya.vashistha.03@gmail.com
 keywords:

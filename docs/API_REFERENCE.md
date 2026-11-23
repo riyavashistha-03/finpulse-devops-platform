@@ -99,6 +99,9 @@ Returns time-series telemetry points for chart visualization.
 ### `GET /api/market/search?q=<query>`
 Searches supported crypto and stock catalog.
 
+### `GET /api/market/stats`
+Returns operational caching telemetry, total supported asset counts, cache hit ratio, and service uptime.
+
 ---
 
 ## 4. Portfolio Management API (`/api/portfolio`)
@@ -119,11 +122,24 @@ Adds an asset holding to portfolio.
   }
   ```
 
+### `GET /api/portfolio/<id>`
+Retrieves single asset details with profit/loss metrics.
+
 ### `PUT /api/portfolio/<id>`
 Updates holding quantity or purchase price.
 
 ### `DELETE /api/portfolio/<id>`
 Deletes asset from portfolio.
+
+### `GET /api/portfolio/analytics`
+Computes deep portfolio analytics:
+- Asset class allocation percentages (`crypto` vs `stock`).
+- Asset holding weights and concentration.
+- Top performing and worst performing holdings.
+- Diversification risk rating (`WELL_DIVERSIFIED`, `MODERATELY_DIVERSIFIED`, `HIGHLY_CONCENTRATED`).
+
+### `GET /api/portfolio/export?format=json|csv`
+Exports portfolio holdings in machine-readable JSON or downloadable CSV format.
 
 ---
 

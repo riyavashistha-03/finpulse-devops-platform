@@ -1,8 +1,11 @@
 app:
   name: "FinPulse"
-  version: "1.0.0"
+  version: "1.1.0"
   description: "Cloud-Native Financial Market & Portfolio Intelligence Platform"
-  author: "Riya Vashistha"
+  authors:
+    - "Vivek Rana (2301730293)"
+    - "Riya Vashistha (2301730345)"
+  author: "Vivek Rana & Riya Vashistha"
   institution: "DevOps & Automation Lab - Capstone Project"
 
 market_engine:
@@ -28,6 +31,15 @@ market_engine:
       - symbol: "LINK"
         name: "Chainlink"
         base_price: 15.30
+      - symbol: "BNB"
+        name: "BNB"
+        base_price: 585.40
+      - symbol: "XRP"
+        name: "XRP"
+        base_price: 0.58
+      - symbol: "AVAX"
+        name: "Avalanche"
+        base_price: 28.75
     equities:
       - symbol: "AAPL"
         name: "Apple Inc."
@@ -41,6 +53,15 @@ market_engine:
       - symbol: "NVDA"
         name: "NVIDIA Corp."
         base_price: 124.60
+      - symbol: "TSLA"
+        name: "Tesla Inc."
+        base_price: 248.50
+      - symbol: "AMZN"
+        name: "Amazon.com Inc."
+        base_price: 186.30
+      - symbol: "META"
+        name: "Meta Platforms Inc."
+        base_price: 512.40
 
 alerts:
   max_alerts_per_user: 25

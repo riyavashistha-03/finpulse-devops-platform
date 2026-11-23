@@ -14,8 +14,14 @@
 **Program:** B. Tech CSE — Semester VII  
 **Component:** Capstone Project (120 Marks)  
 **Project Title:** Design and Implementation of an End-to-End DevOps Automation Platform for Cloud-Native Financial Intelligence  
-**Author:** Riya Vashistha  
 **Repository:** [github.com/riyavashistha-03/finpulse-devops-platform](https://github.com/riyavashistha-03/finpulse-devops-platform)  
+
+### 👥 Project Team & Authors
+
+| Contributor Name | Roll Number | Degree & Specialization | Key Responsibilities |
+| :--- | :--- | :--- | :--- |
+| **Vivek Rana** | **2301730293** | B. Tech CSE (DevOps & Cloud) | Core Architecture, DevOps Pipelines, Security Hardening & Platform Upgrades |
+| **Riya Vashistha** | **2301730345** | B. Tech CSE (DevOps & Cloud) | Cloud-Native Services, IaC, Orchestration & Observability |  
 
 ---
 
@@ -23,15 +29,15 @@
 
 The **FinPulse DevOps Platform** is a complete, production-grade cloud-native software delivery system. It manages and automates the entire software lifecycle—from developer commit in Git to containerized Kubernetes production deployment, automated testing, configuration management, infrastructure provisioning, observability, logging, and zero-downtime deployment strategies.
 
-The underlying application, **FinPulse**, is a real-time financial market analytics and portfolio telemetry service providing asset tracking across cryptocurrencies (BTC, ETH, SOL, ADA, DOT, LINK) and equities (AAPL, MSFT, GOOGL, NVDA), portfolio mark-to-market valuations, customizable price alert threshold engines, and continuous container health telemetry.
+The underlying application, **FinPulse**, is a real-time financial market analytics and portfolio telemetry service providing asset tracking across cryptocurrencies (BTC, ETH, SOL, ADA, DOT, LINK, BNB, XRP, AVAX) and equities (AAPL, MSFT, GOOGL, NVDA, TSLA, AMZN, META), portfolio mark-to-market valuations, customizable price alert threshold engines, and continuous container health telemetry.
 
 ### Key Functional Features
 - **User Authentication:** Registration, password hashing (bcrypt), session tokens, and profile management.
-- **Market Data Engine:** Resilient real-time quotes, 24h percentage shifts, trading volumes, and deterministic fallback for offline CI/CD test execution.
-- **Portfolio Management:** Full CRUD operations for asset holdings with automated cost-basis and unrealized P&L calculations.
+- **Market Data Engine:** Resilient real-time quotes, 24h percentage shifts, trading volumes, caching telemetry (`/api/market/stats`), and deterministic fallback for offline CI/CD test execution.
+- **Portfolio Management & Analytics:** Full CRUD operations for asset holdings, asset class allocation breakdowns (`/api/portfolio/analytics`), diversification scoring, and CSV/JSON portfolio exports (`/api/portfolio/export`).
 - **Price Alert Engine:** Configurable threshold watcher rules with automated evaluation and status tracking.
 - **Glassmorphic UI:** Modern dark-theme responsive dashboard with Chart.js time-series trendlines.
-- **Observability Probes:** Kubernetes liveness (`/live`), readiness (`/ready`), general health (`/health`), and Prometheus metrics (`/metrics`).
+- **Observability & Security Probes:** Kubernetes liveness (`/live`), readiness (`/ready`), general health (`/health`), Prometheus metrics (`/metrics`), and DevSecOps HTTP security response headers (`X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`, `Referrer-Policy`).
 
 ---
 
@@ -68,7 +74,7 @@ The underlying application, **FinPulse**, is a real-time financial market analyt
                               ┌─────────────────────────────────┐
                               │   Automated CI/CD Pipelines     │
                               │   • GitHub Actions & Jenkins    │
-                              │   • Pytest Suite (26 Tests)     │
+                              │   • Pytest Suite (33 Tests)     │
                               │   • DevSecOps SAST & Secrets    │
                               │   • Docker Multi-Stage Build    │
                               └─────────────────────────────────┘
@@ -136,12 +142,13 @@ main (Production releases, semver tagged v1.0.0)
 
 ## 🧪 Phase 2: Automated Testing & Verification
 
-The automated test suite runs via **Pytest** and contains 26 unit and integration tests:
+The automated test suite runs via **Pytest** and contains 33 unit and integration tests:
 - `tests/test_auth.py`: User registration, password hashing, duplicate prevention, login/logout.
 - `tests/test_market.py`: Live and deterministic quotes, 24h calculations, chart history, asset search.
 - `tests/test_portfolio.py`: Asset addition, valuation updates, cost-basis calculations, deletion.
 - `tests/test_alerts.py`: Threshold creation, condition evaluation, trigger states.
 - `tests/test_health_metrics.py`: Observability endpoints (`/health`, `/ready`, `/live`, `/metrics`).
+- `tests/test_analytics_and_security.py`: Portfolio allocation analytics, CSV/JSON exports, market cache telemetry, and HTTP security response headers.
 
 ```bash
 # Run test suite
@@ -150,7 +157,7 @@ python -m pytest -v tests/
 # Run with coverage report and JUnit XML
 python -m pytest -v --junitxml=reports/pytest-results.xml --cov=app tests/
 ```
-**Results:** `26 passed in 5.12s • 81% Total Code Coverage • 0 Warnings`.
+**Results:** `33 passed in 12.6s • 82% Total Code Coverage • 0 Warnings`.
 
 ---
 
@@ -322,8 +329,8 @@ finpulse-devops-platform/
 │   │   └── alert_engine.py       # Threshold evaluation engine
 │   ├── static/                   # Glassmorphic CSS & client JS
 │   └── templates/                # Jinja2 dashboard templates
-├── tests/                        # 26 automated unit & integration tests
-├── kubernetes/                   # Complete K8s manifests (Deploy, SVC, HPA, etc.)
+├── tests/                        # 33 automated unit & integration tests
+├── kubernetes/                   # Complete K8s manifests (Deploy, SVC, HPA, PDB, NetworkPolicy)
 ├── helm/finpulse/                # Helm 3 deployment chart
 ├── ansible/                      # Inventory and playbooks (Docker, K8s, Deploy)
 ├── terraform/                    # Dual-environment IaC (Local Docker & AWS ECS)
@@ -349,4 +356,9 @@ finpulse-devops-platform/
 ## 📄 License & Coursework
 
 Developed as part of the **ENSP461 DevOps & Automation Lab** Capstone Coursework.  
-Author: **Riya Vashistha** • 2026.
+
+**Project Authors & Maintainers:**
+- **Vivek Rana** — Roll No: **2301730293** (Lead DevOps Engineer & Core Contributor)
+- **Riya Vashistha** — Roll No: **2301730345** (Lead Cloud Architect & Core Contributor)
+
+Released under the **MIT License** • 2026.

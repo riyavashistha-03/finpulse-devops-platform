@@ -4,7 +4,9 @@
 **Course:** DevOps & Automation Lab (ENSP461)  
 **Program:** B. Tech Computer Science & Engineering — Semester VII  
 **Component:** Capstone Project (120 Marks)  
-**Author:** Riya Vashistha  
+**Authors:**
+- **Vivek Rana** (Roll No: **2301730293**)
+- **Riya Vashistha** (Roll No: **2301730345**)  
 **Repository:** https://github.com/riyavashistha-03/finpulse-devops-platform  
 
 ---
@@ -114,9 +116,16 @@ tests/test_portfolio.py::test_get_empty_portfolio PASSED                 [ 84%]
 tests/test_portfolio.py::test_add_portfolio_asset PASSED                 [ 88%]
 tests/test_portfolio.py::test_add_portfolio_asset_invalid_data PASSED    [ 92%]
 tests/test_portfolio.py::test_update_portfolio_asset PASSED              [ 96%]
-tests/test_portfolio.py::test_delete_portfolio_asset PASSED              [100%]
+tests/test_portfolio.py::test_delete_portfolio_asset PASSED              [ 78%]
+tests/test_analytics_and_security.py::test_market_stats_endpoint PASSED       [ 81%]
+tests/test_analytics_and_security.py::test_expanded_assets_availability PASSED [ 84%]
+tests/test_analytics_and_security.py::test_security_headers_applied PASSED   [ 87%]
+tests/test_analytics_and_security.py::test_portfolio_analytics_empty PASSED  [ 90%]
+tests/test_analytics_and_security.py::test_portfolio_analytics_with_holdings PASSED [ 93%]
+tests/test_analytics_and_security.py::test_portfolio_export_json PASSED      [ 96%]
+tests/test_analytics_and_security.py::test_portfolio_export_csv PASSED       [100%]
 
-============================= 26 passed in 5.12s ==============================
+============================= 33 passed in 12.63s ==============================
 ```
 
 ### 4.2 DevSecOps Security Scan Output
@@ -125,7 +134,7 @@ tests/test_portfolio.py::test_delete_portfolio_asset PASSED              [100%]
  FinPulse DevSecOps Automated Pipeline Security Scanner 
 ============================================================
 [+] Step 1: Initiating SAST Code Vulnerability & Secret Audit...
-    Scanned 53 project files.
+    Scanned 56 project files.
     [PASS] No hardcoded sensitive production credentials or keys detected.
 
 [+] Step 2: Static Analysis on Production Dockerfile...
@@ -137,6 +146,17 @@ tests/test_portfolio.py::test_delete_portfolio_asset PASSED              [100%]
 [+] Step 3: Auditing Python Dependency Manifest (requirements.txt)...
     Audited 12 pinned packages. All packages pinned with deterministic versions.
     [PASS] Dependency version pinning complete.
+
+[+] Step 4: Auditing Kubernetes Security Policies & Resiliency...
+    [PASS] PodDisruptionBudget (PDB) resiliency manifest configured
+    [PASS] NetworkPolicy zero-trust microsegmentation configured
+    [PASS] Deployment container security context configured
+
+[+] Step 5: Auditing HTTP Security Headers Middleware...
+    [PASS] Security header 'X-Content-Type-Options' enforced
+    [PASS] Security header 'X-Frame-Options' enforced
+    [PASS] Security header 'X-XSS-Protection' enforced
+    [PASS] Security header 'Referrer-Policy' enforced
 
 ============================================================
  [SUCCESS] All DevSecOps policy gates PASSED successfully!

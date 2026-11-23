@@ -111,7 +111,7 @@ def generate_pdf():
     meta_data = [
         [Paragraph("<b>Course:</b> DevOps & Automation Lab (ENSP461)", meta_style), Paragraph("<b>Academic Year:</b> 2026", meta_style)],
         [Paragraph("<b>Program:</b> B. Tech Computer Science & Engineering", meta_style), Paragraph("<b>Semester:</b> VII", meta_style)],
-        [Paragraph("<b>Author / Student:</b> Riya Vashistha", meta_style), Paragraph("<b>Evaluation Component:</b> Capstone (120 Marks)", meta_style)],
+        [Paragraph("<b>Authors:</b> Vivek Rana (2301730293) & Riya Vashistha (2301730345)", meta_style), Paragraph("<b>Evaluation Component:</b> Capstone (120 Marks)", meta_style)],
         [Paragraph("<b>Submission Portal:</b> ZOSIMA & GitHub", meta_style), Paragraph("<b>Repository:</b> riyavashistha-03/finpulse-devops-platform", meta_style)]
     ]
     meta_table = Table(meta_data, colWidths=[260, 260])
