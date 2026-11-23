@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}FinPulse — Price Alerts Engine{% endblock %}
+
+{% block content %}
+<div class="alerts-wrapper">
+    <div class="portfolio-header-bar">
+        <div>
+            <h1 class="page-title"><i class="fa-solid fa-bell"></i> Market Alert Engine</h1>
+            <p class="section-desc">Set dynamic price trigger thresholds for automated condition monitoring</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-outline" id="evaluateAlertsBtn">
+                <i class="fa-solid fa-bolt"></i> Evaluate Now
+            </button>
+            <button class="btn btn-primary" id="openAddAlertModal">
+                <i class="fa-solid fa-plus-circle"></i> Create Alert Rule
+            </button>
+        </div>
+    </div>
+
+    <div class="metrics-grid">
+        <div class="metric-card glass-card">
+            <div class="metric-icon text-primary"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="metric-info">
+                <span class="metric-label">Active Watchers</span>
+                <span class="metric-value" id="activeAlertsCount">0</span>
+            </div>
+            <span class="metric-sub text-muted">Continuous Background Evaluation</span>
+        </div>
+
+        <div class="metric-card glass-card">
+            <div class="metric-icon text-warning"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="metric-info">
+                <span class="metric-label">Triggered Alerts</span>
+                <span class="metric-value text-warning" id="triggeredAlertsCount">0</span>
+            </div>
+            <span class="metric-sub text-muted">Threshold Boundary Reached</span>
+        </div>
+    </div>
+
+    <!-- Alerts Table -->
+    <div class="glass-card table-container">
+        <div class="table-header-row">
+            <h3><i class="fa-solid fa-sliders"></i> Active Monitoring Rules</h3>
+        </div>
+
+        <div class="responsive-table">
+            <table class="data-table" id="alertsTable">
+                <thead>
+                    <tr>
+                        <th>Asset</th>
+                        <th>Condition</th>
+                        <th>Target Price</th>
+                        <th>Current Price</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="alertsTableBody">
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <i class="fa-solid fa-spinner fa-spin"></i> Loading alert rules...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Create Alert Modal -->
+<div class="modal" id="addAlertModal">
+    <div class="modal-content glass-card">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-bell"></i> Create Price Alert</h3>
+            <button class="close-modal" id="closeAddAlertModal">&times;</button>
+        </div>
+        <form id="addAlertForm">
+            <div class="form-group">
+                <label for="alert_symbol">Asset Ticker Symbol</label>
+                <select id="alert_symbol" name="asset_symbol" class="form-input" required>
+                    <option value="">Select an asset...</option>
+                    <option value="BTC">BTC — Bitcoin</option>
+                    <option value="ETH">ETH — Ethereum</option>
+                    <option value="SOL">SOL — Solana</option>
+                    <option value="ADA">ADA — Cardano</option>
+                    <option value="DOT">DOT — Polkadot</option>
+                    <option value="LINK">LINK — Chainlink</option>
+                    <option value="AAPL">AAPL — Apple Inc.</option>
+                    <option value="MSFT">MSFT — Microsoft Corp.</option>
+                    <option value="GOOGL">GOOGL — Alphabet Inc.</option>
+                    <option value="NVDA">NVDA — NVIDIA Corp.</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="condition">Trigger Condition</label>
+                    <select id="condition" name="condition" class="form-input" required>
+                        <option value="above">Price rises above (>=)</option>
+                        <option value="below">Price drops below (<=)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="target_price">Threshold Price (USD)</label>
+                    <input type="number" step="any" min="0.0001" id="target_price" name="target_price" class="form-input" placeholder="e.g. 70000" required>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="cancelAddAlert">Cancel</button>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Activate Alert</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

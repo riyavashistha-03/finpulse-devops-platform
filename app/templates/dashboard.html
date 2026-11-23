@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}FinPulse — Live Market Intelligence{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- Hero / Summary Metrics Banner -->
+    <section class="metrics-grid">
+        <div class="metric-card glass-card">
+            <div class="metric-icon"><i class="fa-solid fa-layer-group"></i></div>
+            <div class="metric-info">
+                <span class="metric-label">Tracked Assets</span>
+                <span class="metric-value">{{ quotes|length }}</span>
+            </div>
+            <span class="metric-sub text-success"><i class="fa-solid fa-circle-check"></i> Real-time Feed</span>
+        </div>
+
+        <div class="metric-card glass-card">
+            <div class="metric-icon text-success"><i class="fa-solid fa-arrow-trend-up"></i></div>
+            <div class="metric-info">
+                <span class="metric-label">Top Performer (24h)</span>
+                <span class="metric-value text-success">
+                    {% if top_gainer %}{{ top_gainer.symbol }} (+{{ top_gainer.change_24h }}%){% else %}N/A{% endif %}
+                </span>
+            </div>
+            <span class="metric-sub">{{ top_gainer.name if top_gainer else '' }}</span>
+        </div>
+
+        <div class="metric-card glass-card">
+            <div class="metric-icon text-danger"><i class="fa-solid fa-arrow-trend-down"></i></div>
+            <div class="metric-info">
+                <span class="metric-label">Top Pullback (24h)</span>
+                <span class="metric-value text-danger">
+                    {% if top_loser %}{{ top_loser.symbol }} ({{ top_loser.change_24h }}%){% else %}N/A{% endif %}
+                </span>
+            </div>
+            <span class="metric-sub">{{ top_loser.name if top_loser else '' }}</span>
+        </div>
+
+        <div class="metric-card glass-card">
+            <div class="metric-icon text-primary"><i class="fa-solid fa-microchip"></i></div>
+            <div class="metric-info">
+                <span class="metric-label">DevOps Orchestration</span>
+                <span class="metric-value text-accent">Kubernetes</span>
+            </div>
+            <span class="metric-sub text-muted">Rolling Zero-Downtime</span>
+        </div>
+    </section>
+
+    <!-- Interactive Telemetry Chart Section -->
+    <section class="chart-section glass-card">
+        <div class="chart-header">
+            <div>
+                <h2 class="section-title"><i class="fa-solid fa-chart-area"></i> Asset Telemetry Trend</h2>
+                <p class="section-desc">Interactive hourly price variations and trendline</p>
+            </div>
+            <div class="chart-controls">
+                <label for="asset-chart-select">Select Asset:</label>
+                <select id="asset-chart-select" class="form-select">
+                    {% for q in quotes %}
+                        <option value="{{ q.symbol }}" {% if loop.first %}selected{% endif %}>{{ q.symbol }} ({{ q.name }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="marketChart" height="90"></canvas>
+        </div>
+    </section>
+
+    <!-- Market Tickers Grid -->
+    <section class="market-section">
+        <div class="section-top-bar">
+            <div>
+                <h2 class="section-title"><i class="fa-solid fa-coins"></i> Live Markets & Quotations</h2>
+                <p class="section-desc">Cryptocurrency and equities market indices</p>
+            </div>
+            <div class="filter-group">
+                <button class="filter-btn active" data-filter="all">All Assets</button>
+                <button class="filter-btn" data-filter="crypto">Crypto</button>
+                <button class="filter-btn" data-filter="stock">Stocks</button>
+            </div>
+        </div>
+
+        <div class="tickers-grid" id="tickersGrid">
+            {% for q in quotes %}
+                <div class="ticker-card glass-card" data-type="{{ q.type }}" data-symbol="{{ q.symbol }}">
+                    <div class="ticker-top">
+                        <div class="ticker-identity">
+                            <span class="ticker-symbol">{{ q.symbol }}</span>
+                            <span class="ticker-name">{{ q.name }}</span>
+                        </div>
+                        <span class="asset-badge {{ q.type }}">{{ q.type|upper }}</span>
+                    </div>
+
+                    <div class="ticker-price-row">
+                        <div class="ticker-price">${{ "{:,.2f}".format(q.price) }}</div>
+                        <div class="ticker-change {% if q.change_24h >= 0 %}positive{% else %}negative{% endif %}">
+                            <i class="fa-solid {% if q.change_24h >= 0 %}fa-caret-up{% else %}fa-caret-down{% endif %}"></i>
+                            {{ "{:+.2f}".format(q.change_24h) }}%
+                        </div>
+                    </div>
+
+                    <div class="ticker-meta">
+                        <div class="meta-item">
+                            <span class="meta-title">24h High</span>
+                            <span class="meta-val">${{ "{:,.2f}".format(q.high_24h) }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-title">24h Low</span>
+                            <span class="meta-val">${{ "{:,.2f}".format(q.low_24h) }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-title">Volume</span>
+                            <span class="meta-val">{{ q.volume_24h }}</span>
+                        </div>
+                    </div>
+
+                    <div class="ticker-footer">
+                        <button class="btn btn-sm btn-outline-primary" onclick="loadChartForAsset('{{ q.symbol }}')">
+                            <i class="fa-solid fa-chart-line"></i> View Chart
+                        </button>
+                        {% if user %}
+                            <a href="{{ url_for('web.portfolio') }}" class="btn btn-sm btn-primary">
+                                <i class="fa-solid fa-plus"></i> Add to Portfolio
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}
