@@ -109,10 +109,11 @@ def generate_pdf():
 
     # Meta Table
     meta_data = [
+        [Paragraph("<b>Author / Student:</b> Vivek Rana", meta_style), Paragraph("<b>Roll Number:</b> 2301730293", meta_style)],
         [Paragraph("<b>Course:</b> DevOps & Automation Lab (ENSP461)", meta_style), Paragraph("<b>Academic Year:</b> 2026", meta_style)],
         [Paragraph("<b>Program:</b> B. Tech Computer Science & Engineering", meta_style), Paragraph("<b>Semester:</b> VII", meta_style)],
-        [Paragraph("<b>Authors:</b> Vivek Rana (2301730293) & Riya Vashistha (2301730345)", meta_style), Paragraph("<b>Evaluation Component:</b> Capstone (120 Marks)", meta_style)],
-        [Paragraph("<b>Submission Portal:</b> ZOSIMA & GitHub", meta_style), Paragraph("<b>Repository:</b> riyavashistha-03/finpulse-devops-platform", meta_style)]
+        [Paragraph("<b>Evaluation Component:</b> Capstone (120 Marks)", meta_style), Paragraph("<b>Repository:</b> vivekrana-031122/finpulse-devops-platform", meta_style)],
+        [Paragraph("<b>Submission Portal:</b> ZOSIMA & GitHub", meta_style), Paragraph("<b>Platform Release:</b> v1.1.0 Production Ready", meta_style)]
     ]
     meta_table = Table(meta_data, colWidths=[260, 260])
     meta_table.setStyle(TableStyle([
@@ -172,11 +173,11 @@ def generate_pdf():
     # Implementation Evidence & Testing
     story.append(Paragraph("3. Automated Testing & Verification Evidence", h1_style))
     story.append(Paragraph(
-        "Quality assurance is enforced through an automated Pytest test suite containing 26 unit and integration test specs covering authentication, market engine, portfolio CRUD, price alert triggering, and Kubernetes health probes (/health, /live, /ready).",
+        "Quality assurance is enforced through an automated Pytest test suite containing 33 unit and integration test specs covering authentication, market engine, portfolio CRUD & deep analytics, export endpoints, price alert triggering, DevSecOps HTTP headers, and Kubernetes health probes (/health, /live, /ready).",
         body_style
     ))
     story.append(Paragraph(
-        "<b>Pytest Execution Results:</b> 26 passed in 5.12s • 81% Total Code Coverage • 0 Failures • 0 Warnings.",
+        "<b>Pytest Execution Results:</b> 33 passed in 13.03s • 82% Total Code Coverage • 0 Failures • 0 Warnings.",
         code_style
     ))
 
