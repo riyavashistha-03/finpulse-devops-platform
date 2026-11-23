@@ -1,0 +1,10 @@
+aws_region           = "us-east-1"
+environment          = "production"
+vpc_cidr             = "10.0.0.0/16"
+public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24"]
+private_subnet_cidrs = ["10.0.10.0/24", "10.0.20.0/24"]
+app_container_image  = "ghcr.io/riyavashistha-03/finpulse-app:1.0.0"
+app_port             = 5050
+desired_task_count   = 2
+fargate_cpu          = "512"
+fargate_memory       = "1024"
