@@ -1,0 +1,14 @@
+apiVersion: v2
+name: finpulse
+description: Helm chart for FinPulse Cloud-Native Financial Platform
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+maintainers:
+  - name: Riya Vashistha
+    email: riya.vashistha.03@gmail.com
+keywords:
+  - fintech
+  - kubernetes
+  - devops
+  - prometheus

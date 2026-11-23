@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: finpulse-config
+  namespace: finpulse-prod
+  labels:
+    app: finpulse
+data:
+  FLASK_ENV: "production"
+  PORT: "5050"
+  HOST: "0.0.0.0"
+  GUNICORN_WORKERS: "2"
+  GUNICORN_THREADS: "4"
+  GUNICORN_TIMEOUT: "120"
+  CACHE_EXPIRATION_SECONDS: "60"
+  PROMETHEUS_METRICS_ENABLED: "true"
+  DEFAULT_CURRENCY: "USD"

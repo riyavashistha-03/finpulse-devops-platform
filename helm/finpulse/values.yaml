@@ -1,0 +1,44 @@
+replicaCount: 3
+
+image:
+  repository: ghcr.io/riyavashistha-03/finpulse-app
+  pullPolicy: IfNotPresent
+  tag: "1.0.0"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 5050
+  nodePort: 30050
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  hosts:
+    - host: finpulse.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 80
+
+env:
+  flaskEnv: "production"
+  port: "5050"
+  secretKey: "prod-finpulse-super-secret-key-84930219"
+  databaseUrl: "sqlite:////app/instance/finpulse_prod.db"
