@@ -1,0 +1,53 @@
+app:
+  name: "FinPulse"
+  version: "1.0.0"
+  description: "Cloud-Native Financial Market & Portfolio Intelligence Platform"
+  author: "Riya Vashistha"
+  institution: "DevOps & Automation Lab - Capstone Project"
+
+market_engine:
+  base_currency: "USD"
+  cache_ttl_seconds: 60
+  supported_assets:
+    crypto:
+      - symbol: "BTC"
+        name: "Bitcoin"
+        base_price: 68450.00
+      - symbol: "ETH"
+        name: "Ethereum"
+        base_price: 3520.50
+      - symbol: "SOL"
+        name: "Solana"
+        base_price: 182.40
+      - symbol: "ADA"
+        name: "Cardano"
+        base_price: 0.62
+      - symbol: "DOT"
+        name: "Polkadot"
+        base_price: 7.85
+      - symbol: "LINK"
+        name: "Chainlink"
+        base_price: 15.30
+    equities:
+      - symbol: "AAPL"
+        name: "Apple Inc."
+        base_price: 228.50
+      - symbol: "MSFT"
+        name: "Microsoft Corp."
+        base_price: 442.20
+      - symbol: "GOOGL"
+        name: "Alphabet Inc."
+        base_price: 178.90
+      - symbol: "NVDA"
+        name: "NVIDIA Corp."
+        base_price: 124.60
+
+alerts:
+  max_alerts_per_user: 25
+  evaluation_interval_seconds: 30
+
+telemetry:
+  metrics_path: "/metrics"
+  health_path: "/health"
+  readiness_path: "/ready"
+  liveness_path: "/live"
