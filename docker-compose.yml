@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  finpulse-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: finpulse-app:1.0.0
+    container_name: finpulse-service
+    restart: unless-stopped
+    ports:
+      - "5050:5050"
+    environment:
+      - FLASK_ENV=production
+      - PORT=5050
+      - HOST=0.0.0.0
+      - SECRET_KEY=finpulse-super-secure-production-key-2026
+      - DATABASE_URL=sqlite:////app/instance/finpulse_prod.db
+      - GUNICORN_WORKERS=2
+      - GUNICORN_THREADS=4
+    volumes:
+      - finpulse-data:/app/instance
+      - finpulse-logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5050/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - finpulse-net
+
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: finpulse-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - finpulse-net
+    depends_on:
+      - finpulse-app
+
+networks:
+  finpulse-net:
+    driver: bridge
+    name: finpulse-network
+
+volumes:
+  finpulse-data:
+    name: finpulse-data-volume
+  finpulse-logs:
+    name: finpulse-logs-volume
+  prometheus-data:
+    name: finpulse-prometheus-data
