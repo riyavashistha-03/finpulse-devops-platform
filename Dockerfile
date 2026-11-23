@@ -18,9 +18,9 @@ RUN pip install --no-cache-dir --user -r requirements.txt
 # Stage 2: Hardened Runtime Container
 FROM python:3.11-slim AS runtime
 
-LABEL maintainer="Riya Vashistha <riya.vashistha.03@gmail.com>" \
+LABEL maintainer="Vivek Rana <vivekrana.031122@gmail.com>, Riya Vashistha <riya.vashistha.03@gmail.com>" \
       project="FinPulse DevOps Platform" \
-      version="1.0.0"
+      version="1.1.0"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

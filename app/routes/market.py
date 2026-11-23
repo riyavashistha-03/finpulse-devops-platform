@@ -54,3 +54,9 @@ def search_assets():
 
     matches = market_service.search_assets(query)
     return jsonify({"status": "success", "query": query, "results": matches}), 200
+
+@market_bp.route("/stats", methods=["GET"])
+def get_market_service_stats():
+    """Retrieve runtime caching telemetry and market service health."""
+    stats = market_service.get_cache_stats()
+    return jsonify({"status": "success", "stats": stats}), 200

@@ -202,3 +202,160 @@ def delete_portfolio_asset(current_user, asset_id):
     db.session.commit()
 
     return jsonify({"status": "success", "message": f"Asset {symbol} deleted successfully"}), 200
+
+@portfolio_bp.route("/analytics", methods=["GET"])
+@login_required
+def get_portfolio_analytics(current_user):
+    """Compute detailed portfolio analytics, asset allocation, and risk metrics."""
+    assets = PortfolioAsset.query.filter_by(user_id=current_user.id).all()
+    if not assets:
+        return jsonify({
+            "status": "success",
+            "analytics": {
+                "total_assets": 0,
+                "total_invested": 0.0,
+                "total_current_value": 0.0,
+                "total_pnl": 0.0,
+                "total_pnl_percentage": 0.0,
+                "allocation_by_class": {"crypto": 0.0, "stock": 0.0},
+                "allocation_by_asset": [],
+                "top_performer": None,
+                "worst_performer": None,
+                "diversification_status": "EMPTY"
+            }
+        }), 200
+
+    total_cost = 0.0
+    total_value = 0.0
+    class_values = {"crypto": 0.0, "stock": 0.0}
+    evaluated_assets = []
+
+    for asset in assets:
+        quote = market_service.get_quote(asset.asset_symbol)
+        curr_price = quote["price"] if quote else asset.buy_price
+        cost = asset.quantity * asset.buy_price
+        val = asset.quantity * curr_price
+        pnl = val - cost
+        pnl_pct = (pnl / cost * 100) if cost > 0 else 0.0
+
+        total_cost += cost
+        total_value += val
+        asset_class = asset.asset_type.lower()
+        if asset_class in class_values:
+            class_values[asset_class] += val
+        else:
+            class_values[asset_class] = val
+
+        evaluated_assets.append({
+            "symbol": asset.asset_symbol,
+            "name": asset.asset_name,
+            "type": asset.asset_type,
+            "quantity": asset.quantity,
+            "current_value": round(val, 2),
+            "unrealized_pnl": round(pnl, 2),
+            "pnl_percentage": round(pnl_pct, 2)
+        })
+
+    # Allocation breakdown
+    allocation_by_asset = []
+    for item in evaluated_assets:
+        pct = round((item["current_value"] / total_value * 100), 2) if total_value > 0 else 0.0
+        allocation_by_asset.append({
+            "symbol": item["symbol"],
+            "name": item["name"],
+            "type": item["type"],
+            "value": item["current_value"],
+            "percentage": pct
+        })
+
+    allocation_by_asset.sort(key=lambda x: x["value"], reverse=True)
+
+    allocation_by_class = {
+        cls: round((val / total_value * 100), 2) if total_value > 0 else 0.0
+        for cls, val in class_values.items()
+    }
+
+    evaluated_assets.sort(key=lambda x: x["pnl_percentage"], reverse=True)
+    top_performer = evaluated_assets[0] if evaluated_assets else None
+    worst_performer = evaluated_assets[-1] if evaluated_assets else None
+
+    # Diversification assessment
+    max_share = allocation_by_asset[0]["percentage"] if allocation_by_asset else 0.0
+    if max_share > 70.0:
+        div_status = "HIGHLY_CONCENTRATED"
+    elif max_share > 40.0:
+        div_status = "MODERATELY_DIVERSIFIED"
+    else:
+        div_status = "WELL_DIVERSIFIED"
+
+    total_pnl = total_value - total_cost
+    total_pnl_pct = (total_pnl / total_cost * 100) if total_cost > 0 else 0.0
+
+    return jsonify({
+        "status": "success",
+        "analytics": {
+            "total_assets": len(assets),
+            "total_invested": round(total_cost, 2),
+            "total_current_value": round(total_value, 2),
+            "total_pnl": round(total_pnl, 2),
+            "total_pnl_percentage": round(total_pnl_pct, 2),
+            "allocation_by_class": allocation_by_class,
+            "allocation_by_asset": allocation_by_asset,
+            "top_performer": top_performer,
+            "worst_performer": worst_performer,
+            "diversification_status": div_status
+        }
+    }), 200
+
+@portfolio_bp.route("/export", methods=["GET"])
+@login_required
+def export_portfolio(current_user):
+    """Export user's portfolio in JSON or CSV format."""
+    export_format = request.args.get("format", "json").lower().strip()
+    assets = PortfolioAsset.query.filter_by(user_id=current_user.id).all()
+
+    rows = []
+    for asset in assets:
+        quote = market_service.get_quote(asset.asset_symbol)
+        curr_price = quote["price"] if quote else asset.buy_price
+        cost = asset.quantity * asset.buy_price
+        val = asset.quantity * curr_price
+        pnl = val - cost
+        pnl_pct = (pnl / cost * 100) if cost > 0 else 0.0
+
+        rows.append({
+            "asset_id": asset.id,
+            "symbol": asset.asset_symbol,
+            "name": asset.asset_name,
+            "type": asset.asset_type,
+            "quantity": asset.quantity,
+            "buy_price": asset.buy_price,
+            "current_price": round(curr_price, 2),
+            "total_cost": round(cost, 2),
+            "current_value": round(val, 2),
+            "unrealized_pnl": round(pnl, 2),
+            "pnl_percentage": round(pnl_pct, 2),
+            "notes": asset.notes or ""
+        })
+
+    if export_format == "csv":
+        import io
+        import csv
+        output = io.StringIO()
+        fieldnames = ["asset_id", "symbol", "name", "type", "quantity", "buy_price", "current_price", "total_cost", "current_value", "unrealized_pnl", "pnl_percentage", "notes"]
+        writer = csv.DictWriter(output, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+        from flask import Response
+        return Response(
+            output.getvalue(),
+            mimetype="text/csv",
+            headers={"Content-Disposition": f"attachment; filename=finpulse_portfolio_{current_user.username}.csv"}
+        )
+
+    return jsonify({
+        "status": "success",
+        "username": current_user.username,
+        "exported_items_count": len(rows),
+        "holdings": rows
+    }), 200

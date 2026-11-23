@@ -2,9 +2,9 @@ name: FinPulse CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, vivek-branch, "feature/**" ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, vivek-branch ]
 
 jobs:
   test-and-coverage:

@@ -2,10 +2,13 @@
 Alert Evaluation Engine
 Evaluates configured price threshold conditions against active market quotes.
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Any
 from app.extensions import db, ACTIVE_ALERTS
 from app.models import PriceAlert, MarketAuditLog
+
+def utc_now():
+    return datetime.now(timezone.utc)
 
 class AlertEngine:
     def __init__(self, market_service):
@@ -31,7 +34,7 @@ class AlertEngine:
 
             if triggered and not alert.is_triggered:
                 alert.is_triggered = True
-                alert.triggered_at = datetime.utcnow()
+                alert.triggered_at = utc_now()
                 db.session.add(alert)
 
                 log = MarketAuditLog(

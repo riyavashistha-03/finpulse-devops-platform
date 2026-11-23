@@ -47,6 +47,12 @@ def create_app(config_name: str = None) -> Flask:
 
     @app.after_request
     def record_metrics(response):
+        # Apply DevSecOps hardened HTTP security response headers
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
         if hasattr(request, "_start_time") and request.endpoint != "metrics":
             duration = time.time() - request._start_time
             endpoint = request.endpoint or "unknown"

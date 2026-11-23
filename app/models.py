@@ -2,9 +2,13 @@
 SQLAlchemy Data Models for FinPulse
 Includes User, PortfolioAsset, PriceAlert, and MarketAuditLog entities.
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.extensions import db
+
+def utc_now():
+    """Return current UTC datetime (Python 3.11+ / 3.12+ / 3.13 compatible)."""
+    return datetime.now(timezone.utc)
 
 class User(db.Model):
     """User account entity with secure password hashing and relationship cascade."""
@@ -14,7 +18,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(256), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    created_at = db.Column(db.DateTime, default=utc_now, nullable=False)
 
     # Relationships
     portfolio_assets = db.relationship("PortfolioAsset", backref="user", cascade="all, delete-orphan", lazy="dynamic")
@@ -50,8 +54,8 @@ class PortfolioAsset(db.Model):
     quantity = db.Column(db.Float, nullable=False)
     buy_price = db.Column(db.Float, nullable=False)
     notes = db.Column(db.String(255), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = db.Column(db.DateTime, default=utc_now, nullable=False)
+    updated_at = db.Column(db.DateTime, default=utc_now, onupdate=utc_now, nullable=False)
 
     def to_dict(self):
         """Serialize portfolio asset with cost basis."""
@@ -82,7 +86,7 @@ class PriceAlert(db.Model):
     is_triggered = db.Column(db.Boolean, default=False, nullable=False)
     triggered_at = db.Column(db.DateTime, nullable=True)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    created_at = db.Column(db.DateTime, default=utc_now, nullable=False)
 
     def to_dict(self):
         """Serialize alert rule."""
@@ -106,7 +110,7 @@ class MarketAuditLog(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
     action = db.Column(db.String(64), nullable=False)
     details = db.Column(db.Text, nullable=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+    timestamp = db.Column(db.DateTime, default=utc_now, nullable=False, index=True)
 
     def to_dict(self):
         return {
