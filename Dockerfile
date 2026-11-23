@@ -20,7 +20,7 @@ FROM python:3.11-slim AS runtime
 
 LABEL maintainer="Vivek Rana <vivekrana.031122@gmail.com>, Riya Vashistha <riya.vashistha.03@gmail.com>" \
       project="FinPulse DevOps Platform" \
-      version="1.1.0"
+      version="1.2.0"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

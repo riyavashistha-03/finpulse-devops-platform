@@ -23,12 +23,14 @@ def dashboard():
     quotes = market_service.get_all_quotes()
     top_gainer = max(quotes, key=lambda x: x["change_24h"]) if quotes else None
     top_loser = min(quotes, key=lambda x: x["change_24h"]) if quotes else None
+    sentiment = market_service.get_market_sentiment()
     return render_template(
         "dashboard.html",
         user=user,
         quotes=quotes,
         top_gainer=top_gainer,
-        top_loser=top_loser
+        top_loser=top_loser,
+        sentiment=sentiment
     )
 
 @web_bp.route("/portfolio")

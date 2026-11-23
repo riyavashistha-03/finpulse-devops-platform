@@ -4,7 +4,7 @@ Pytest Fixtures and Global Test Configuration
 import pytest
 from app import create_app
 from app.extensions import db
-from app.models import User, PortfolioAsset, PriceAlert
+from app.models import User, PortfolioAsset, PriceAlert, WatchlistItem, PortfolioTransaction
 
 @pytest.fixture(scope="session")
 def app():
@@ -20,6 +20,8 @@ def client(app):
     """Test client with isolated database transaction per test."""
     with app.app_context():
         # Clear tables between tests
+        db.session.query(WatchlistItem).delete()
+        db.session.query(PortfolioTransaction).delete()
         db.session.query(PriceAlert).delete()
         db.session.query(PortfolioAsset).delete()
         db.session.query(User).delete()

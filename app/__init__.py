@@ -3,6 +3,7 @@ FinPulse Application Factory
 Configures Flask, database models, blueprints, Prometheus telemetry, and health probes.
 """
 import os
+import sys
 import time
 from pathlib import Path
 from flask import Flask, jsonify, request, Response
@@ -15,7 +16,7 @@ from app.extensions import (
     ACTIVE_PORTFOLIOS,
     ACTIVE_ALERTS
 )
-from app.models import User, PortfolioAsset, PriceAlert
+from app.models import User, PortfolioAsset, PriceAlert, WatchlistItem, PortfolioTransaction
 from app.routes.auth import auth_bp
 from app.routes.market import market_bp
 from app.routes.portfolio import portfolio_bp
@@ -97,6 +98,36 @@ def create_app(config_name: str = None) -> Flask:
             return jsonify({"status": "READY", "traffic_enabled": True}), 200
         except Exception as e:
             return jsonify({"status": "NOT_READY", "error": str(e)}), 503
+
+    @app.route("/api/system/info", methods=["GET"])
+    def system_info():
+        """Retrieve deployment metadata, runtime telemetry, and SRE circuit breaker status."""
+        from app.services import circuit_breaker
+        return jsonify({
+            "status": "success",
+            "service": "FinPulse DevOps Platform",
+            "version": app.config.get("APP_VERSION", "1.2.0"),
+            "environment": app.config.get("ENVIRONMENT", "development"),
+            "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+            "authors": [
+                {"name": "Vivek Rana", "roll_no": "2301730293", "role": "Lead DevOps Engineer"},
+                {"name": "Riya Vashistha", "roll_no": "2301730345", "role": "Cloud Architect"}
+            ],
+            "active_features": [
+                "authentication_bcrypt",
+                "market_quotes_resilient",
+                "technical_indicators_rsi_sma_bollinger",
+                "market_sentiment_fear_greed",
+                "portfolio_analytics_allocation",
+                "portfolio_transaction_ledger",
+                "watchlist_pinning",
+                "price_alerts_engine",
+                "circuit_breaker_resilience",
+                "prometheus_observability",
+                "devsecops_hardened_headers"
+            ],
+            "circuit_breaker": circuit_breaker.get_status()
+        }), 200
 
     @app.route("/metrics", methods=["GET"])
     def metrics():

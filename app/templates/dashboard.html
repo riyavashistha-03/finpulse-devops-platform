@@ -38,12 +38,21 @@
         </div>
 
         <div class="metric-card glass-card">
+            <div class="metric-icon text-warning"><i class="fa-solid fa-gauge-high"></i></div>
+            <div class="metric-info">
+                <span class="metric-label">Market Sentiment</span>
+                <span class="metric-value text-accent">{{ sentiment.sentiment_score if sentiment else 50 }}/100</span>
+            </div>
+            <span class="metric-sub text-success"><i class="fa-solid fa-fire"></i> {{ sentiment.classification if sentiment else 'Neutral' }} (RSI: {{ sentiment.average_rsi if sentiment else 50 }})</span>
+        </div>
+
+        <div class="metric-card glass-card">
             <div class="metric-icon text-primary"><i class="fa-solid fa-microchip"></i></div>
             <div class="metric-info">
                 <span class="metric-label">DevOps Orchestration</span>
-                <span class="metric-value text-accent">Kubernetes</span>
+                <span class="metric-value text-accent">Kubernetes v1.29</span>
             </div>
-            <span class="metric-sub text-muted">Rolling Zero-Downtime</span>
+            <span class="metric-sub text-muted">Zero-Downtime & PDB</span>
         </div>
     </section>
 

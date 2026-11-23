@@ -40,6 +40,9 @@ Kubernetes readiness probe.
 ### `GET /metrics`
 Prometheus text-formatted operational metrics. Exposes request throughput counters, latency histograms, and alert gauges.
 
+### `GET /api/system/info`
+Returns platform release version (v1.2.0), environment runtime, active feature flags, author credits, and SRE Circuit Breaker state.
+
 ---
 
 ## 2. Authentication API (`/api/auth`)
@@ -102,6 +105,25 @@ Searches supported crypto and stock catalog.
 ### `GET /api/market/stats`
 Returns operational caching telemetry, total supported asset counts, cache hit ratio, and service uptime.
 
+### `GET /api/market/technical/<symbol>`
+Calculates real-time quantitative technical indicators:
+- `rsi_14`: 14-period Relative Strength Index.
+- `sma_7` & `sma_14`: 7-day and 14-day Simple Moving Averages.
+- `bollinger_upper`, `bollinger_middle`, `bollinger_lower`: Volatility bands.
+- `signal`: Trading action recommendation (`BUY`, `SELL`, `HOLD`, `STRONG_BUY`, `STRONG_SELL`).
+
+### `GET /api/market/sentiment`
+Returns macro Fear & Greed composite sentiment index (0-100), market breadth ratios, and top bullish/bearish market movers.
+
+### `GET /api/market/watchlist`
+*Requires authentication.* Retrieves user's pinned watchlist with real-time pricing and technical signals.
+
+### `POST /api/market/watchlist`
+*Requires authentication.* Adds a ticker to the user's personal watchlist.
+
+### `DELETE /api/market/watchlist/<symbol>`
+*Requires authentication.* Removes a ticker from user's watchlist.
+
 ---
 
 ## 4. Portfolio Management API (`/api/portfolio`)
@@ -140,6 +162,24 @@ Computes deep portfolio analytics:
 
 ### `GET /api/portfolio/export?format=json|csv`
 Exports portfolio holdings in machine-readable JSON or downloadable CSV format.
+
+### `POST /api/portfolio/transaction`
+Executes and logs an asset trade (`BUY` or `SELL`):
+- `BUY`: Automatically recalculates weighted average cost-basis of portfolio holdings.
+- `SELL`: Verifies holding sufficiency, deducts quantity, and calculates net realized profit/loss.
+- **Payload:**
+  ```json
+  {
+    "asset_symbol": "BTC",
+    "transaction_type": "BUY",
+    "quantity": 0.5,
+    "price": 68000.0,
+    "notes": "Dip accumulation"
+  }
+  ```
+
+### `GET /api/portfolio/transactions`
+Retrieves the immutable transaction ledger with cumulative buy volume, sell volume, and net realized P&L.
 
 ---
 

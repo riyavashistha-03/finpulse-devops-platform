@@ -4,7 +4,7 @@ Provides full CRUD operations for user assets and live profit/loss calculations.
 """
 from flask import Blueprint, request, jsonify
 from app.extensions import db, ACTIVE_PORTFOLIOS
-from app.models import PortfolioAsset, MarketAuditLog
+from app.models import PortfolioAsset, MarketAuditLog, PortfolioTransaction
 from app.routes.auth import login_required
 from app.services import market_service
 
@@ -358,4 +358,128 @@ def export_portfolio(current_user):
         "username": current_user.username,
         "exported_items_count": len(rows),
         "holdings": rows
+    }), 200
+
+@portfolio_bp.route("/transaction", methods=["POST"])
+@login_required
+def record_transaction(current_user):
+    """Execute and record a portfolio trade (BUY / SELL) with automated cost-basis and realized P&L."""
+    data = request.get_json() or {}
+    symbol = data.get("asset_symbol", "").strip().upper()
+    tx_type = data.get("transaction_type", "").strip().upper()
+    quantity = data.get("quantity")
+    price = data.get("price")
+    notes = data.get("notes", "").strip()
+
+    if not symbol or not tx_type or quantity is None:
+        return jsonify({"status": "error", "message": "asset_symbol, transaction_type, and quantity are required"}), 400
+
+    if tx_type not in ["BUY", "SELL"]:
+        return jsonify({"status": "error", "message": "transaction_type must be either 'BUY' or 'SELL'"}), 400
+
+    try:
+        quantity = float(quantity)
+        if quantity <= 0:
+            return jsonify({"status": "error", "message": "Quantity must be strictly positive"}), 400
+    except (ValueError, TypeError):
+        return jsonify({"status": "error", "message": "Quantity must be numeric"}), 400
+
+    quote = market_service.get_quote(symbol)
+    if price is None:
+        if not quote:
+            return jsonify({"status": "error", "message": f"Asset '{symbol}' not found and no price provided"}), 400
+        price = quote["price"]
+    else:
+        try:
+            price = float(price)
+            if price < 0:
+                return jsonify({"status": "error", "message": "Price cannot be negative"}), 400
+        except (ValueError, TypeError):
+            return jsonify({"status": "error", "message": "Price must be numeric"}), 400
+
+    total_amount = quantity * price
+    realized_pnl = 0.0
+
+    holding = PortfolioAsset.query.filter_by(user_id=current_user.id, asset_symbol=symbol).first()
+
+    if tx_type == "BUY":
+        if holding:
+            # Weighted average cost basis recalculation
+            total_qty = holding.quantity + quantity
+            total_invested = (holding.quantity * holding.buy_price) + total_amount
+            holding.quantity = total_qty
+            holding.buy_price = round(total_invested / total_qty, 2)
+            if notes:
+                holding.notes = notes
+        else:
+            asset_name = quote["name"] if quote else symbol
+            asset_type = quote["type"] if quote else "crypto"
+            holding = PortfolioAsset(
+                user_id=current_user.id,
+                asset_symbol=symbol,
+                asset_name=asset_name,
+                asset_type=asset_type,
+                quantity=quantity,
+                buy_price=round(price, 2),
+                notes=notes
+            )
+            db.session.add(holding)
+    elif tx_type == "SELL":
+        if not holding or holding.quantity < quantity:
+            avail = holding.quantity if holding else 0.0
+            return jsonify({
+                "status": "error",
+                "message": f"Insufficient holdings to sell {quantity} {symbol} (available: {avail})"
+            }), 400
+
+        # Calculate realized P&L based on cost basis
+        realized_pnl = round((price - holding.buy_price) * quantity, 2)
+        holding.quantity -= quantity
+        if holding.quantity <= 1e-6:
+            db.session.delete(holding)
+
+    tx = PortfolioTransaction(
+        user_id=current_user.id,
+        asset_symbol=symbol,
+        transaction_type=tx_type,
+        quantity=quantity,
+        price_per_unit=round(price, 2),
+        total_amount=round(total_amount, 2),
+        realized_pnl=realized_pnl,
+        notes=notes
+    )
+    db.session.add(tx)
+
+    log = MarketAuditLog(
+        user_id=current_user.id,
+        action=f"PORTFOLIO_{tx_type}",
+        details=f"{tx_type} {quantity} {symbol} at ${price:.2f} (Realized PnL: ${realized_pnl:.2f})"
+    )
+    db.session.add(log)
+    db.session.commit()
+
+    return jsonify({
+        "status": "success",
+        "message": f"Transaction {tx_type} for {quantity} {symbol} executed successfully",
+        "transaction": tx.to_dict()
+    }), 201
+
+@portfolio_bp.route("/transactions", methods=["GET"])
+@login_required
+def get_transactions(current_user):
+    """Retrieve full audit history of user portfolio transactions with cumulative realized P&L."""
+    txs = PortfolioTransaction.query.filter_by(user_id=current_user.id).order_by(PortfolioTransaction.timestamp.desc()).all()
+    total_realized_pnl = sum(t.realized_pnl for t in txs)
+    total_buys = sum(t.total_amount for t in txs if t.transaction_type == "BUY")
+    total_sells = sum(t.total_amount for t in txs if t.transaction_type == "SELL")
+
+    return jsonify({
+        "status": "success",
+        "summary": {
+            "total_transactions": len(txs),
+            "total_buy_volume": round(total_buys, 2),
+            "total_sell_volume": round(total_sells, 2),
+            "net_realized_pnl": round(total_realized_pnl, 2)
+        },
+        "transactions": [t.to_dict() for t in txs]
     }), 200

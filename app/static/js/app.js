@@ -437,3 +437,41 @@ function initAuthForms() {
         });
     }
 }
+
+// --- WATCHLIST & TECHNICAL INTELLIGENCE HELPERS ---
+async function toggleWatchlist(symbol) {
+    try {
+        const res = await fetch("/api/market/watchlist", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ asset_symbol: symbol })
+        });
+        const data = await res.json();
+        if (res.status === 201) {
+            alert(`Added ${symbol} to your personal Watchlist!`);
+        } else if (res.status === 409) {
+            // Already present, remove it
+            const delRes = await fetch(`/api/market/watchlist/${symbol}`, { method: "DELETE" });
+            if (delRes.ok) {
+                alert(`Removed ${symbol} from your Watchlist.`);
+            }
+        } else {
+            alert(data.message || "Failed to update watchlist.");
+        }
+    } catch (err) {
+        console.error("Watchlist toggle failed:", err);
+    }
+}
+
+async function showTechnicalIndicators(symbol) {
+    try {
+        const res = await fetch(`/api/market/technical/${symbol}`);
+        const data = await res.json();
+        if (data.status === "success") {
+            const ind = data.data;
+            alert(`[Technical Analysis: ${ind.symbol}]\nPrice: $${ind.current_price}\nRSI (14): ${ind.rsi_14}\nSMA-7: $${ind.sma_7}\nSMA-14: $${ind.sma_14}\nBollinger Upper: $${ind.bollinger_upper}\nBollinger Lower: $${ind.bollinger_lower}\nSignal: ${ind.signal}\nRationale: ${ind.signal_rationale}`);
+        }
+    } catch (err) {
+        console.error("Failed to fetch technical indicators:", err);
+    }
+}

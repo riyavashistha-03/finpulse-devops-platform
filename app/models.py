@@ -24,6 +24,8 @@ class User(db.Model):
     portfolio_assets = db.relationship("PortfolioAsset", backref="user", cascade="all, delete-orphan", lazy="dynamic")
     alerts = db.relationship("PriceAlert", backref="user", cascade="all, delete-orphan", lazy="dynamic")
     audit_logs = db.relationship("MarketAuditLog", backref="user", cascade="all, delete-orphan", lazy="dynamic")
+    watchlist_items = db.relationship("WatchlistItem", backref="user", cascade="all, delete-orphan", lazy="dynamic")
+    transactions = db.relationship("PortfolioTransaction", backref="user", cascade="all, delete-orphan", lazy="dynamic")
 
     def set_password(self, password: str):
         """Hash and persist user password."""
@@ -118,5 +120,58 @@ class MarketAuditLog(db.Model):
             "user_id": self.user_id,
             "action": self.action,
             "details": self.details,
+            "timestamp": self.timestamp.isoformat() if self.timestamp else None
+        }
+
+class WatchlistItem(db.Model):
+    """User-pinned watchlist asset tracking."""
+    __tablename__ = "watchlist_items"
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "asset_symbol", name="uq_user_watchlist_asset"),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    asset_symbol = db.Column(db.String(12), nullable=False, index=True)
+    asset_name = db.Column(db.String(64), nullable=True)
+    asset_type = db.Column(db.String(16), default="crypto", nullable=False)
+    added_at = db.Column(db.DateTime, default=utc_now, nullable=False)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "asset_symbol": self.asset_symbol.upper(),
+            "asset_name": self.asset_name,
+            "asset_type": self.asset_type,
+            "added_at": self.added_at.isoformat() if self.added_at else None
+        }
+
+class PortfolioTransaction(db.Model):
+    """Immutable ledger of asset trades (BUY / SELL) and realized gains/losses."""
+    __tablename__ = "portfolio_transactions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    asset_symbol = db.Column(db.String(12), nullable=False, index=True)
+    transaction_type = db.Column(db.String(16), nullable=False) # 'BUY' or 'SELL'
+    quantity = db.Column(db.Float, nullable=False)
+    price_per_unit = db.Column(db.Float, nullable=False)
+    total_amount = db.Column(db.Float, nullable=False)
+    realized_pnl = db.Column(db.Float, default=0.0, nullable=False)
+    notes = db.Column(db.String(255), nullable=True)
+    timestamp = db.Column(db.DateTime, default=utc_now, nullable=False, index=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "asset_symbol": self.asset_symbol.upper(),
+            "transaction_type": self.transaction_type.upper(),
+            "quantity": float(self.quantity),
+            "price_per_unit": float(self.price_per_unit),
+            "total_amount": round(float(self.total_amount), 2),
+            "realized_pnl": round(float(self.realized_pnl), 2),
+            "notes": self.notes,
             "timestamp": self.timestamp.isoformat() if self.timestamp else None
         }

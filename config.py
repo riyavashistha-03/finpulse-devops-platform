@@ -14,7 +14,7 @@ class Config:
     PORT = int(os.getenv("PORT", 5050))
     HOST = os.getenv("HOST", "0.0.0.0")
     APP_NAME = "FinPulse"
-    APP_VERSION = "1.1.0"
+    APP_VERSION = "1.2.0"
     ENVIRONMENT = os.getenv("FLASK_ENV", "development")
     CACHE_EXPIRATION_SECONDS = int(os.getenv("CACHE_EXPIRATION_SECONDS", 60))
     PROMETHEUS_METRICS_ENABLED = os.getenv("PROMETHEUS_METRICS_ENABLED", "true").lower() == "true"

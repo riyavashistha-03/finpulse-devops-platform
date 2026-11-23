@@ -86,46 +86,54 @@ FinPulse utilizes a cloud-native micro-tier topology built on Python Flask, Guni
 ### 4.1 Pytest Automated Test Execution Evidence
 The automated test suite verifies 100% of application capabilities prior to container creation:
 ```
-platform win32 -- Python 3.11.9, pytest-9.2.0, pluggy-1.7.0
-rootdir: C:\Users\Rahul Dev\Downloads\finpulse-devops-platform
-plugins: anyio-4.11.0, cov-7.1.0
-collected 26 items
+platform win32 -- Python 3.13.3, pytest-9.2.0, pluggy-1.7.0
+rootdir: C:\Users\DELL\OneDrive\Desktop\assignment\finpulse-devops-platform
+plugins: cov-7.1.0
+collected 41 items
 
-tests/test_alerts.py::test_create_price_alert PASSED                     [  3%]
-tests/test_alerts.py::test_create_alert_invalid_condition PASSED         [  7%]
-tests/test_alerts.py::test_toggle_alert PASSED                           [ 11%]
-tests/test_alerts.py::test_evaluate_alerts PASSED                        [ 15%]
-tests/test_alerts.py::test_delete_alert PASSED                           [ 19%]
-tests/test_auth.py::test_register_success PASSED                         [ 23%]
-tests/test_auth.py::test_register_duplicate_username PASSED              [ 26%]
-tests/test_auth.py::test_register_short_password PASSED                  [ 30%]
-tests/test_auth.py::test_login_success PASSED                            [ 34%]
-tests/test_auth.py::test_login_invalid_password PASSED                   [ 38%]
-tests/test_auth.py::test_get_current_user_profile PASSED                 [ 42%]
-tests/test_auth.py::test_logout PASSED                                   [ 46%]
-tests/test_health_metrics.py::test_health_probe PASSED                   [ 50%]
-tests/test_health_metrics.py::test_liveness_probe PASSED                 [ 53%]
-tests/test_health_metrics.py::test_readiness_probe PASSED                [ 57%]
-tests/test_health_metrics.py::test_prometheus_metrics_endpoint PASSED    [ 61%]
-tests/test_market.py::test_get_market_overview PASSED                    [ 65%]
-tests/test_market.py::test_get_single_quote_btc PASSED                   [ 69%]
-tests/test_market.py::test_get_single_quote_not_found PASSED             [ 73%]
-tests/test_market.py::test_get_asset_history PASSED                      [ 76%]
-tests/test_market.py::test_search_assets PASSED                          [ 80%]
-tests/test_portfolio.py::test_get_empty_portfolio PASSED                 [ 84%]
-tests/test_portfolio.py::test_add_portfolio_asset PASSED                 [ 88%]
-tests/test_portfolio.py::test_add_portfolio_asset_invalid_data PASSED    [ 92%]
-tests/test_portfolio.py::test_update_portfolio_asset PASSED              [ 96%]
-tests/test_portfolio.py::test_delete_portfolio_asset PASSED              [ 78%]
-tests/test_analytics_and_security.py::test_market_stats_endpoint PASSED       [ 81%]
-tests/test_analytics_and_security.py::test_expanded_assets_availability PASSED [ 84%]
-tests/test_analytics_and_security.py::test_security_headers_applied PASSED   [ 87%]
-tests/test_analytics_and_security.py::test_portfolio_analytics_empty PASSED  [ 90%]
-tests/test_analytics_and_security.py::test_portfolio_analytics_with_holdings PASSED [ 93%]
-tests/test_analytics_and_security.py::test_portfolio_export_json PASSED      [ 96%]
-tests/test_analytics_and_security.py::test_portfolio_export_csv PASSED       [100%]
+tests/test_advanced_features.py::test_technical_indicators_success PASSED [  2%]
+tests/test_advanced_features.py::test_technical_indicators_not_found PASSED [  4%]
+tests/test_advanced_features.py::test_market_sentiment_engine PASSED     [  7%]
+tests/test_advanced_features.py::test_watchlist_lifecycle PASSED         [  9%]
+tests/test_advanced_features.py::test_portfolio_transaction_buy_and_average_price PASSED [ 12%]
+tests/test_advanced_features.py::test_portfolio_transaction_sell_and_realized_pnl PASSED [ 14%]
+tests/test_advanced_features.py::test_circuit_breaker_resilience PASSED  [ 17%]
+tests/test_advanced_features.py::test_system_info_endpoint PASSED        [ 19%]
+tests/test_alerts.py::test_create_price_alert PASSED                     [ 21%]
+tests/test_alerts.py::test_create_alert_invalid_condition PASSED         [ 24%]
+tests/test_alerts.py::test_toggle_alert PASSED                           [ 26%]
+tests/test_alerts.py::test_evaluate_alerts PASSED                        [ 29%]
+tests/test_alerts.py::test_delete_alert PASSED                           [ 31%]
+tests/test_analytics_and_security.py::test_market_stats_endpoint PASSED  [ 34%]
+tests/test_analytics_and_security.py::test_expanded_assets_availability PASSED [ 36%]
+tests/test_analytics_and_security.py::test_security_headers_applied PASSED [ 39%]
+tests/test_analytics_and_security.py::test_portfolio_analytics_empty PASSED [ 41%]
+tests/test_analytics_and_security.py::test_portfolio_analytics_with_holdings PASSED [ 43%]
+tests/test_analytics_and_security.py::test_portfolio_export_json PASSED  [ 46%]
+tests/test_analytics_and_security.py::test_portfolio_export_csv PASSED   [ 48%]
+tests/test_auth.py::test_register_success PASSED                         [ 51%]
+tests/test_auth.py::test_register_duplicate_username PASSED              [ 53%]
+tests/test_auth.py::test_register_short_password PASSED                  [ 56%]
+tests/test_auth.py::test_login_success PASSED                            [ 58%]
+tests/test_auth.py::test_login_invalid_password PASSED                   [ 60%]
+tests/test_auth.py::test_get_current_user_profile PASSED                 [ 63%]
+tests/test_auth.py::test_logout PASSED                                   [ 65%]
+tests/test_health_metrics.py::test_health_probe PASSED                   [ 68%]
+tests/test_health_metrics.py::test_liveness_probe PASSED                 [ 70%]
+tests/test_health_metrics.py::test_readiness_probe PASSED                [ 73%]
+tests/test_health_metrics.py::test_prometheus_metrics_endpoint PASSED    [ 75%]
+tests/test_market.py::test_get_market_overview PASSED                    [ 78%]
+tests/test_market.py::test_get_single_quote_btc PASSED                   [ 80%]
+tests/test_market.py::test_get_single_quote_not_found PASSED             [ 82%]
+tests/test_market.py::test_get_asset_history PASSED                      [ 85%]
+tests/test_market.py::test_search_assets PASSED                          [ 87%]
+tests/test_portfolio.py::test_get_empty_portfolio PASSED                 [ 90%]
+tests/test_portfolio.py::test_add_portfolio_asset PASSED                 [ 92%]
+tests/test_portfolio.py::test_add_portfolio_asset_invalid_data PASSED    [ 95%]
+tests/test_portfolio.py::test_update_portfolio_asset PASSED              [ 97%]
+tests/test_portfolio.py::test_delete_portfolio_asset PASSED              [100%]
 
-============================= 33 passed in 12.63s ==============================
+============================= 41 passed in 8.41s ==============================
 ```
 
 ### 4.2 DevSecOps Security Scan Output

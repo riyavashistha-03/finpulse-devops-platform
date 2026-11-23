@@ -7,7 +7,7 @@
 [![Terraform](https://img.shields.io/badge/terraform-v1.5+-7B42BC.svg)](https://www.terraform.io/)
 [![Ansible](https://img.shields.io/badge/ansible-automated-EE0000.svg)](https://www.ansible.com/)
 [![Prometheus](https://img.shields.io/badge/prometheus-monitored-E6522C.svg)](https://prometheus.io/)
-[![Coverage](https://img.shields.io/badge/coverage-81%25-brightgreen.svg)]()
+[![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen.svg)]()
 [![License](https://img.shields.io/badge/license-MIT-green.svg)]()
 
 **Course:** DevOps & Automation Lab (ENSP461)  
@@ -34,10 +34,15 @@ The underlying application, **FinPulse**, is a real-time financial market analyt
 ### Key Functional Features
 - **User Authentication:** Registration, password hashing (bcrypt), session tokens, and profile management.
 - **Market Data Engine:** Resilient real-time quotes, 24h percentage shifts, trading volumes, caching telemetry (`/api/market/stats`), and deterministic fallback for offline CI/CD test execution.
+- **Quantitative Technical Indicators:** Real-time computation of RSI-14, SMA-7, SMA-14, Bollinger Bands, and automated trading recommendation signals (`BUY`, `SELL`, `HOLD`, `STRONG_BUY`, `STRONG_SELL`) via `/api/market/technical/<symbol>`.
+- **Market Sentiment & Breadth Index:** Macro composite Fear & Greed sentiment engine (0–100 score) tracking market breadth, bullish/bearish asset ratios, and top performers via `/api/market/sentiment`.
+- **Personal Watchlist Pinning:** Authenticated bookmarking and tracking of favorite assets with live price feeds (`/api/market/watchlist`).
 - **Portfolio Management & Analytics:** Full CRUD operations for asset holdings, asset class allocation breakdowns (`/api/portfolio/analytics`), diversification scoring, and CSV/JSON portfolio exports (`/api/portfolio/export`).
+- **Transaction Ledger & Realized P&L:** Execution and permanent recording of BUY/SELL trades with automated cost-basis recalculation and realized profit/loss ledger (`/api/portfolio/transaction`).
 - **Price Alert Engine:** Configurable threshold watcher rules with automated evaluation and status tracking.
-- **Glassmorphic UI:** Modern dark-theme responsive dashboard with Chart.js time-series trendlines.
-- **Observability & Security Probes:** Kubernetes liveness (`/live`), readiness (`/ready`), general health (`/health`), Prometheus metrics (`/metrics`), and DevSecOps HTTP security response headers (`X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`, `Referrer-Policy`).
+- **SRE Circuit Breaker Resilience:** Fault-tolerant circuit breaker pattern (`CLOSED`, `OPEN`, `HALF_OPEN`) preventing cascade failures with upstream market feeds.
+- **Glassmorphic UI:** Modern dark-theme responsive dashboard with Chart.js time-series trendlines and sentiment metrics.
+- **Observability & Security Probes:** Kubernetes liveness (`/live`), readiness (`/ready`), general health (`/health`), system telemetry (`/api/system/info`), Prometheus metrics (`/metrics`), and DevSecOps HTTP security response headers (`X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`, `Referrer-Policy`).
 
 ---
 
@@ -74,7 +79,7 @@ The underlying application, **FinPulse**, is a real-time financial market analyt
                               ┌─────────────────────────────────┐
                               │   Automated CI/CD Pipelines     │
                               │   • GitHub Actions & Jenkins    │
-                              │   • Pytest Suite (33 Tests)     │
+                              │   • Pytest Suite (41 Tests)     │
                               │   • DevSecOps SAST & Secrets    │
                               │   • Docker Multi-Stage Build    │
                               └─────────────────────────────────┘
@@ -142,13 +147,14 @@ main (Production releases, semver tagged v1.0.0)
 
 ## 🧪 Phase 2: Automated Testing & Verification
 
-The automated test suite runs via **Pytest** and contains 33 unit and integration tests:
+The automated test suite runs via **Pytest** and contains 41 unit and integration tests:
 - `tests/test_auth.py`: User registration, password hashing, duplicate prevention, login/logout.
 - `tests/test_market.py`: Live and deterministic quotes, 24h calculations, chart history, asset search.
 - `tests/test_portfolio.py`: Asset addition, valuation updates, cost-basis calculations, deletion.
 - `tests/test_alerts.py`: Threshold creation, condition evaluation, trigger states.
 - `tests/test_health_metrics.py`: Observability endpoints (`/health`, `/ready`, `/live`, `/metrics`).
 - `tests/test_analytics_and_security.py`: Portfolio allocation analytics, CSV/JSON exports, market cache telemetry, and HTTP security response headers.
+- `tests/test_advanced_features.py`: Technical indicators (RSI-14, SMA-7, SMA-14, Bollinger Bands), market sentiment index, watchlist lifecycle, portfolio transaction ledger with realized P&L, SRE circuit breaker resilience, and system metadata.
 
 ```bash
 # Run test suite
@@ -157,7 +163,7 @@ python -m pytest -v tests/
 # Run with coverage report and JUnit XML
 python -m pytest -v --junitxml=reports/pytest-results.xml --cov=app tests/
 ```
-**Results:** `33 passed in 12.6s • 82% Total Code Coverage • 0 Warnings`.
+**Results:** `41 passed in 8.41s • 85% Total Code Coverage • 0 Warnings`.
 
 ---
 
@@ -325,11 +331,12 @@ finpulse-devops-platform/
 │   │   ├── alerts.py             # Price alerts API
 │   │   └── web.py                # Web UI controllers
 │   ├── services/
-│   │   ├── market_data.py        # Resilient quote service & fallback
-│   │   └── alert_engine.py       # Threshold evaluation engine
+│   │   ├── market_data.py        # Resilient quote service & quantitative indicators
+│   │   ├── alert_engine.py       # Threshold evaluation engine
+│   │   └── circuit_breaker.py    # SRE fault-tolerant circuit breaker
 │   ├── static/                   # Glassmorphic CSS & client JS
 │   └── templates/                # Jinja2 dashboard templates
-├── tests/                        # 33 automated unit & integration tests
+├── tests/                        # 41 automated unit & integration tests
 ├── kubernetes/                   # Complete K8s manifests (Deploy, SVC, HPA, PDB, NetworkPolicy)
 ├── helm/finpulse/                # Helm 3 deployment chart
 ├── ansible/                      # Inventory and playbooks (Docker, K8s, Deploy)

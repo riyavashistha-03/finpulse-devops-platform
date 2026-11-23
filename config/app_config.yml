@@ -1,6 +1,6 @@
 app:
   name: "FinPulse"
-  version: "1.1.0"
+  version: "1.2.0"
   description: "Cloud-Native Financial Market & Portfolio Intelligence Platform"
   authors:
     - "Vivek Rana (2301730293)"

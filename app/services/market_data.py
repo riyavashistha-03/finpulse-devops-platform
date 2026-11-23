@@ -145,3 +145,140 @@ class MarketDataService:
                     "base_price": data["base_price"]
                 })
         return results
+
+    def get_technical_indicators(self, symbol: str) -> Optional[Dict[str, Any]]:
+        """Compute quantitative technical indicators (RSI, SMA-7, SMA-14, Bollinger Bands, signals)."""
+        symbol = symbol.upper().strip()
+        history = self.get_history(symbol, points=28)
+        prices = history.get("points", [])
+        if len(prices) < 14:
+            return None
+
+        current_price = prices[-1]
+
+        # SMA 7 and SMA 14
+        sma_7 = round(sum(prices[-7:]) / 7.0, 2)
+        sma_14 = round(sum(prices[-14:]) / 14.0, 2)
+
+        # Standard deviation for Bollinger Bands (over 14 periods)
+        mean_14 = sma_14
+        variance = sum((p - mean_14) ** 2 for p in prices[-14:]) / 14.0
+        std_dev = math.sqrt(variance)
+        upper_band = round(mean_14 + (2 * std_dev), 2)
+        lower_band = round(max(mean_14 - (2 * std_dev), 0.01), 2)
+
+        # RSI (14 periods)
+        gains = []
+        losses = []
+        for i in range(len(prices) - 14, len(prices)):
+            change = prices[i] - prices[i - 1]
+            if change > 0:
+                gains.append(change)
+                losses.append(0.0)
+            else:
+                gains.append(0.0)
+                losses.append(abs(change))
+
+        avg_gain = sum(gains) / 14.0 if gains else 0.0
+        avg_loss = sum(losses) / 14.0 if losses else 0.0
+
+        if avg_loss == 0:
+            rsi = 100.0
+        else:
+            rs = avg_gain / avg_loss
+            rsi = round(100.0 - (100.0 / (1.0 + rs)), 1)
+
+        volatility_pct = round((std_dev / current_price * 100), 2) if current_price > 0 else 0.0
+
+        # Technical Signal Interpretation
+        if rsi <= 30 and current_price <= lower_band:
+            signal = "STRONG_BUY"
+            signal_rationale = "Oversold RSI and price touching lower Bollinger Band"
+        elif rsi <= 42 or current_price < sma_7:
+            signal = "BUY"
+            signal_rationale = "Bullish momentum accumulation under short-term average"
+        elif rsi >= 70 and current_price >= upper_band:
+            signal = "STRONG_SELL"
+            signal_rationale = "Overbought RSI and price testing upper Bollinger Band"
+        elif rsi >= 58 or current_price > sma_7:
+            signal = "SELL"
+            signal_rationale = "Overextended rally above short-term moving average"
+        else:
+            signal = "HOLD"
+            signal_rationale = "Balanced oscillator momentum within consolidation range"
+
+        return {
+            "symbol": symbol,
+            "name": history.get("name", symbol),
+            "current_price": current_price,
+            "rsi_14": rsi,
+            "sma_7": sma_7,
+            "sma_14": sma_14,
+            "bollinger_upper": upper_band,
+            "bollinger_middle": sma_14,
+            "bollinger_lower": lower_band,
+            "volatility_24h_pct": volatility_pct,
+            "signal": signal,
+            "signal_rationale": signal_rationale
+        }
+
+    def get_market_sentiment(self) -> Dict[str, Any]:
+        """Compute composite market Fear & Greed sentiment index across all assets."""
+        quotes = self.get_all_quotes()
+        if not quotes:
+            return {"sentiment_score": 50.0, "classification": "Neutral", "badge": "secondary"}
+
+        rsi_scores = []
+        changes = []
+        asset_scores = []
+
+        for q in quotes:
+            sym = q["symbol"]
+            tech = self.get_technical_indicators(sym)
+            rsi = tech["rsi_14"] if tech else 50.0
+            rsi_scores.append(rsi)
+            changes.append(q["change_24h"])
+            asset_scores.append((sym, q["change_24h"], rsi))
+
+        avg_rsi = sum(rsi_scores) / len(rsi_scores) if rsi_scores else 50.0
+        avg_change = sum(changes) / len(changes) if changes else 0.0
+
+        change_component = max(min(avg_change * 5.0, 25.0), -25.0)
+        rsi_component = (avg_rsi - 50.0) * 0.5
+        composite_score = round(max(min(50.0 + change_component + rsi_component, 100.0), 0.0), 1)
+
+        if composite_score >= 75:
+            classification = "Extreme Greed"
+            badge = "success"
+        elif composite_score >= 56:
+            classification = "Greed"
+            badge = "info"
+        elif composite_score >= 45:
+            classification = "Neutral"
+            badge = "secondary"
+        elif composite_score >= 25:
+            classification = "Fear"
+            badge = "warning"
+        else:
+            classification = "Extreme Fear"
+            badge = "danger"
+
+        asset_scores.sort(key=lambda x: (x[1], x[2]), reverse=True)
+        top_bull = asset_scores[0][0] if asset_scores else "BTC"
+        top_bear = asset_scores[-1][0] if asset_scores else "ETH"
+
+        bullish_count = sum(1 for c in changes if c > 0)
+        bearish_count = sum(1 for c in changes if c < 0)
+
+        return {
+            "sentiment_score": composite_score,
+            "classification": classification,
+            "badge": badge,
+            "average_rsi": round(avg_rsi, 1),
+            "average_24h_change": round(avg_change, 2),
+            "bullish_assets_count": bullish_count,
+            "bearish_assets_count": bearish_count,
+            "total_assets_analyzed": len(quotes),
+            "top_bullish_asset": top_bull,
+            "top_bearish_asset": top_bear
+        }
