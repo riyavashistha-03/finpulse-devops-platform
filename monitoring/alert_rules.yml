@@ -1,0 +1,38 @@
+groups:
+  - name: finpulse_alerts
+    rules:
+      - alert: FinPulseServiceDown
+        expr: up{job="finpulse-app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "FinPulse application instance is unreachable"
+          description: "Instance {{ $labels.instance }} has been down for over 1 minute."
+
+      - alert: HighHttpErrorRate
+        expr: (sum(rate(finpulse_http_requests_total{status=~"5.."}[5m])) / sum(rate(finpulse_http_requests_total[5m]))) * 100 > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Elevated HTTP 5xx error rate detected"
+          description: "More than 5% of requests resulted in HTTP 5xx errors over the last 5 minutes."
+
+      - alert: HighRequestLatency
+        expr: histogram_quantile(0.95, sum(rate(finpulse_request_duration_seconds_bucket[5m])) by (le)) > 0.5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Elevated latency on FinPulse API"
+          description: "95th percentile latency exceeds 500ms."
+
+      - alert: InactiveAlertEngine
+        expr: finpulse_active_alerts_total == 0
+        for: 15m
+        labels:
+          severity: info
+        annotations:
+          summary: "Zero active price alerts registered"
+          description: "Price alert engine reports 0 active rules."
