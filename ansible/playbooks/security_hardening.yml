@@ -1,0 +1,51 @@
+---
+- name: Infrastructure Security Hardening & Firewall Baseline
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install security packages (UFW, fail2ban)
+      apt:
+        name:
+          - ufw
+          - fail2ban
+        state: present
+        update_cache: yes
+
+    - name: Set UFW default incoming traffic to deny
+      ufw:
+        direction: incoming
+        policy: deny
+
+    - name: Set UFW default outgoing traffic to allow
+      ufw:
+        direction: outgoing
+        policy: allow
+
+    - name: Allow SSH port 22
+      ufw:
+        rule: allow
+        port: '22'
+        proto: tcp
+
+    - name: Allow FinPulse application port 5050
+      ufw:
+        rule: allow
+        port: '5050'
+        proto: tcp
+
+    - name: Allow Kubernetes API port 6443
+      ufw:
+        rule: allow
+        port: '6443'
+        proto: tcp
+      when: "'control_plane' in group_names"
+
+    - name: Enable UFW firewall service
+      ufw:
+        state: enabled
+
+    - name: Ensure fail2ban is running and enabled
+      service:
+        name: fail2ban
+        state: started
+        enabled: yes

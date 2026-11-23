@@ -1,0 +1,57 @@
+---
+- name: Deploy FinPulse Cloud-Native Application
+  hosts: docker_hosts
+  become: yes
+  vars:
+    app_dir: /opt/finpulse
+    repo_url: https://github.com/riyavashistha-03/finpulse-devops-platform.git
+    image_tag: "1.0.0"
+
+  tasks:
+    - name: Ensure deployment directory structure exists
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+        owner: ubuntu
+        group: ubuntu
+      loop:
+        - "{{ app_dir }}"
+        - "{{ app_dir }}/instance"
+        - "{{ app_dir }}/logs"
+
+    - name: Pull latest production Docker image
+      docker_image:
+        name: "ghcr.io/riyavashistha-03/finpulse-app:{{ image_tag }}"
+        source: pull
+
+    - name: Run FinPulse application container
+      docker_container:
+        name: finpulse-service
+        image: "ghcr.io/riyavashistha-03/finpulse-app:{{ image_tag }}"
+        state: started
+        restart_policy: unless-stopped
+        ports:
+          - "5050:5050"
+        env:
+          FLASK_ENV: "production"
+          PORT: "5050"
+          SECRET_KEY: "prod-finpulse-super-secret-key-84930219"
+          DATABASE_URL: "sqlite:////app/instance/finpulse_prod.db"
+        volumes:
+          - "{{ app_dir }}/instance:/app/instance"
+          - "{{ app_dir }}/logs:/app/logs"
+
+    - name: Wait for application health check to succeed
+      uri:
+        url: "http://localhost:5050/health"
+        status_code: 200
+        return_content: yes
+      register: health_result
+      until: health_result.status == 200
+      retries: 6
+      delay: 5
+
+    - name: Print deployment verification summary
+      debug:
+        msg: "FinPulse successfully deployed! Health check returned UP on port 5050."
